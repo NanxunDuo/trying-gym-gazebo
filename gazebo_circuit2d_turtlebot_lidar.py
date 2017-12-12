@@ -15,19 +15,6 @@ from sensor_msgs.msg import LaserScan
 
 from gym.utils import seeding
 
-'''
-goal_urdf = open("/home/lq/.gazbeo/models/wood_cube_10cm/model.sdf","r").read()
-def spawn_model_call():
-        rospy.wait_for_service('gazebo/spawn_gazebo_model')
-
-        model_srv = rospy.ServiceProxy('gazebo/spawn_gazebo_model')
-        req = SpawnModelRequest()
-        req.model_name = 'wood_cube_10cm'#the same with urdf name
-        req.model_xml = goal_urdf
-        req.Pose.position.x = random.uniform(1,200)
-        req.Pose.position.y = random.uniform(1,200)
-        res = model_srv(req)
-'''
 class GazeboCircuit2TurtlebotLidarEnv(gazebo_env.GazeboEnv):
 
     def __init__(self):
@@ -36,7 +23,7 @@ class GazeboCircuit2TurtlebotLidarEnv(gazebo_env.GazeboEnv):
         self.vel_pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=5)
         self.unpause = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
         self.pause = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
-        rospy.init_node('gazebo/spawn_gazebo_model')
+        rospy.init_node('/gazebo/spawn_sdf_model')#need to add this node in launch file?
         self.goal = rospy.Publisher('/gazebo/spawn_sdf_model',SpawnModel)
         self.reset_proxy = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
 
@@ -127,12 +114,12 @@ class GazeboCircuit2TurtlebotLidarEnv(gazebo_env.GazeboEnv):
         except rospy.ServiceException, e:
             print ("/gazebo/reset_simulation service call failed")
 
-        rospy.wait_for_service('gazebo/spawn_model')
+        rospy.wait_for_service('/gazebo/spawn_sdf_model')
         try:
             #reset_proxy.call()
             goal_urdf = open("/home/lq/gym-gazebo/gym_gazebo/envs/assets/models/wood_cube_10cm/model.sdf","r").read()
             req = SpawnModel
-            req.model_name = 'wood_cube_10cm'#the same with urdf name
+            req.model_name = 'wood_cube_10cm'#the same with sdf name
             req.model_xml = goal_urdf
             req.Pose.position.x = random.uniform(1,200)
             req.Pose.position.y = random.uniform(1,200)
